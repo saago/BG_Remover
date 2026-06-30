@@ -29,9 +29,25 @@ if getattr(sys, 'frozen', False):
     f = open(os.devnull, 'w')
     sys.stdout = f
     sys.stderr = f
+else:
+    # פילטר שמנקה הדפסות אזהרה ישירות ל-stderr מצד customtkinter
+    class CTkStderrFilter:
+        def __init__(self, stream):
+            self.stream = stream
+        def write(self, data):
+            if "customtkinter.windows.widgets.font warning" in data or "font_shapes" in data or "circle_shapes" in data:
+                return
+            self.stream.write(data)
+        def flush(self):
+            self.stream.flush()
+    sys.stderr = CTkStderrFilter(sys.stderr)
 # -----------------------------------------------------------
 
 import customtkinter as ctk
+
+# הגדרה רשמית לשיטת ציור חלופית (ליתר ביטחון)
+ctk.DrawEngine.preferred_drawing_method = "polygon_shapes"
+
 from tkinter import filedialog, messagebox
 from PIL import Image
 from rembg import remove
